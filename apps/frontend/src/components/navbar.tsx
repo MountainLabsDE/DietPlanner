@@ -14,6 +14,7 @@ export function Navbar() {
     { href: '/recipes', label: 'Recipes', icon: '🍳' },
     { href: '/meal-plans', label: 'Meal Plans', icon: '📅' },
     { href: '/scanner', label: 'Scanner', icon: '📷' },
+    { href: '/calendar', label: 'Calendar', icon: '📆' },
     { href: '/tracking', label: 'Tracking', icon: '📊' },
     { href: '/settings', label: 'Settings', icon: '⚙️' },
   ];
