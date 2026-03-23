@@ -241,6 +241,40 @@ export class ApiClient {
     const blob = await response.blob();
     return blob;
   }
+
+  // Diet Profile methods
+  async getDietProfiles(predefinedOnly = false, page = 1, limit = 10): Promise<any> {
+    const queryParams = new URLSearchParams();
+    if (predefinedOnly) queryParams.append('predefinedOnly', 'true');
+    queryParams.append('page', page.toString());
+    queryParams.append('limit', limit.toString());
+
+    return this.request(`/diet-profiles?${queryParams}`, { method: 'GET' });
+  }
+
+  async getPredefinedProfiles(): Promise<any> {
+    return this.request('/diet-profiles/predefined', { method: 'GET' });
+  }
+
+  async getDietProfile(id: string): Promise<any> {
+    return this.request(`/diet-profiles/${id}`, { method: 'GET' });
+  }
+
+  async createDietProfile(data: any): Promise<any> {
+    return this.post('/diet-profiles', data);
+  }
+
+  async updateDietProfile(id: string, data: any): Promise<any> {
+    return this.put(`/diet-profiles/${id}`, data);
+  }
+
+  async deleteDietProfile(id: string): Promise<any> {
+    return this.delete(`/diet-profiles/${id}`);
+  }
+
+  async combineDietProfiles(name: string, profileIds: string[]): Promise<any> {
+    return this.post('/diet-profiles/combine', { name, profileIds });
+  }
 }
 
 export const api = new ApiClient();

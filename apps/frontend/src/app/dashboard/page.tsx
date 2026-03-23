@@ -60,25 +60,34 @@ export default function DashboardPage() {
               </div>
             </a>
 
-            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-2 border-purple-200">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+            <a
+              href="/diet-profiles"
+              className="bg-gradient-to-br from-blue-500 to-teal-500 text-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+            >
+              <h3 className="text-2xl font-bold mb-2">
                 Diet Profiles
               </h3>
-              <p className="text-gray-600">
+              <p className="opacity-90">
                 Create and manage your diet preferences
               </p>
-            </div>
+              <div className="mt-4 flex items-center text-sm font-medium opacity-75 group-hover:opacity-100 transition-opacity">
+                Click to start
+              </div>
+            </a>
 
             <a
               href="/meal-plans"
-              className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-2 border-pink-200"
+              className="bg-gradient-to-br from-orange-500 to-red-500 text-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
             >
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              <h3 className="text-2xl font-bold mb-2">
                 Meal Plans
               </h3>
-              <p className="text-gray-600">
+              <p className="opacity-90">
                 Generate infinite meal plans automatically
               </p>
+              <div className="mt-4 flex items-center text-sm font-medium opacity-75">
+                Click to start
+              </div>
             </a>
           </div>
 
