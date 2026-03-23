@@ -1,0 +1,213 @@
+// Prisma Schema for PlatePulse
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(uuid())
+  email             String   @unique
+  passwordHash      String
+  firstName         String?
+  lastName          String?
+  avatarUrl         String?
+  dateOfBirth       DateTime?
+  heightCm          Int?
+  weightKg          Decimal? @db.Decimal(5, 2)
+  activityLevel     String?
+  preferences       Json     @default("{}")
+  isVerified        Boolean  @default(false)
+  isEmailSubscribed Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  dietProfiles      DietProfile[]
+  customRecipes     CustomRecipe[]
+  tracking          DailyTracking[]
+  achievements      Achievement[]
+
+  @@map("users")
+  @@index([email])
+  @@index([isVerified])
+}
+
+model DietProfile {
+  id                   String   @id @default(uuid())
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name                 String
+  type                 String
+  restrictions          Json
+  macros               Json
+  preferences          Json
+  excludedIngredients    String[]
+  combinedProfileIds    String[]
+  isDefault            Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  mealPlans            MealPlan[]
+
+  @@map("diet_profiles")
+  @@index([userId])
+  @@index([userId, isDefault])
+}
+
+model Recipe {
+  id           String   @id @default(uuid())
+  name         String
+  description  String?
+  images       String[]
+  prepTime     Int
+  cookTime     Int?
+  servings     Int      @default(4)
+  difficulty   String?
+  ingredients  Json
+  instructions  Json
+  nutrition    Json
+  tags         String[]
+  cuisine      String?
+  dietaryInfo  Json[]
+  authorId     String?
+  author       User?    @relation(fields: [authorId], references: [id])
+  isPublic     Boolean  @default(true)
+  avgRating    Decimal? @default(0) @db.Decimal(3, 2)
+  reviewCount  Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  mealPlanMeals MealPlanMeal[]
+
+  @@map("recipes")
+  @@index([dietaryInfo], type: Gin)
+  @@index([tags], type: Gin)
+  @@index([cuisine])
+  @@index([avgRating(sort: Desc)])
+}
+
+model MealPlan {
+  id          String   @id @default(uuid())
+  userId      String
+  profileId   String
+  name        String?
+  config      Json
+  days        Json
+  generatedAt DateTime @default(now())
+  isFavorite  Boolean  @default(false)
+  shares      Int      @default(0)
+  createdAt    DateTime @default(now())
+  profile     DietProfile @relation(fields: [profileId], references: [id])
+  meals       MealPlanMeal[]
+
+  @@map("meal_plans")
+  @@index([userId])
+  @@index([generatedAt(sort: Desc)])
+  @@index([userId, isFavorite])
+}
+
+model MealPlanMeal {
+  id         String @id @default(uuid())
+  mealPlanId String
+  mealPlan   MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  recipeId   String
+  recipe     Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  mealType   String
+  dayNumber  Int
+
+  @@map("meal_plan_meals")
+  @@id([id])
+  @@index([mealPlanId])
+}
+
+model DailyTracking {
+  id                 String   @id @default(uuid())
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date               DateTime
+  meals              Json
+  waterMl            Int      @default(0)
+  weightKg           Decimal?  @db.Decimal(5, 2)
+  caloriesConsumed   Int      @default(0)
+  caloriesTarget     Int
+  macrosConsumed     Json
+  macrosTarget       Json
+  completedGoals     String[] @default([])
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("daily_tracking")
+  @@unique([userId, date])
+  @@index([userId, date])
+  @@index([date])
+}
+
+model CustomRecipe {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  desc       String?
+  images     String[]
+  prepTime   Int
+  cookTime   Int?
+  servings   Int      @default(4)
+  difficulty String?
+  ingredients Json
+  instructions  Json
+  nutrition   Json
+  tags       String[]
+  cuisine    String?
+  isPublic   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("custom_recipes")
+  @@index([userId])
+}
+
+model Achievement {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        String
+  title       String
+  description String?
+  earnedAt    DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  @@map("achievements")
+  @@index([userId])
+  @@index([userId, earnedAt])
+}
+
+model Product {
+  id            String   @id @default(uuid())
+  barcode       String   @unique
+  name          String
+  brand         String?
+  imageUrl      String?
+  nutrition     Json
+  dietaryInfo   Json[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  barcodeScans BarcodeScan[]
+
+  @@map("products")
+  @@index([barcode])
+  @@index([name])
+}
+
+model BarcodeScan {
+  id         String   @id @default(uuid())
+  userId     String
+  barcode    String
+  product    Product  @relation(fields: [barcode], references: [id])
+  scannedAt  DateTime @default(now())
+
+  @@map("barcode_scans")
+  @@index([userId])
+  @@index([barcode])
+}

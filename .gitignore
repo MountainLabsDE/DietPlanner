@@ -1,5 +1,10 @@
 # IMPORTANT: .development folder is tracked in Git for this project!
 
+# Environment variables
+.env
+.env.*
+!.env.example
+
 # Logs
 logs
 *.log
