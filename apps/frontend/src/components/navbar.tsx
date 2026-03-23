@@ -16,6 +16,7 @@ export function Navbar() {
     { href: '/scanner', label: 'Scanner', icon: '📷' },
     { href: '/calendar', label: 'Calendar', icon: '📆' },
     { href: '/tracking', label: 'Tracking', icon: '📊' },
+    { href: '/ai', label: 'AI Features', icon: '🤖' },
     { href: '/settings', label: 'Settings', icon: '⚙️' },
   ];
 
