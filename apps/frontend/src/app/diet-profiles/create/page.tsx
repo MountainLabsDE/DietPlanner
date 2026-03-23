@@ -70,7 +70,7 @@ export default function CreateDietProfilePage() {
     );
   };
 
-  const setMacroPreset = (preset: typeof MACRO_COMBINATIONS[0]) => {
+  const setMacroPreset = (preset: typeof MACRO_COMBINATIONS[number]) => {
     setProteinPercentage(preset.protein);
     setCarbsPercentage(preset.carbs);
     setFatPercentage(preset.fat);

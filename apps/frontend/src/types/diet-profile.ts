@@ -197,7 +197,7 @@ export const MACRO_COMBINATIONS = [
     description: 'Muscle building',
   },
   {
-    name: ' ketogenic',
+    name: 'Ketogenic',
     protein: 25,
     carbs: 5,
     fat: 70,
