@@ -69,14 +69,17 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-2 border-pink-200">
+            <a
+              href="/meal-plans"
+              className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-2 border-pink-200"
+            >
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
                 Meal Plans
               </h3>
               <p className="text-gray-600">
                 Generate infinite meal plans automatically
               </p>
-            </div>
+            </a>
           </div>
 
           <div className="bg-white rounded-2xl p-8 shadow-lg">

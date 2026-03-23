@@ -181,6 +181,66 @@ export class ApiClient {
     const queryParams = maxPrepTime ? `?maxPrepTime=${maxPrepTime}` : '';
     return this.request(`/recipes/quick${queryParams}`, { method: 'GET' });
   }
+
+  // Meal Plan methods
+  async getMealPlans(params?: {
+    page?: number;
+    limit?: number;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+
+    const queryString = queryParams.toString();
+    const endpoint = `/meal-plans${queryString ? `?${queryString}` : ''}`;
+    
+    return this.request(endpoint, { method: 'GET' });
+  }
+
+  async getMealPlan(id: string) {
+    return this.request(`/meal-plans/${id}`, { method: 'GET' });
+  }
+
+  async generateMealPlan(config: any) {
+    return this.request(`/meal-plans/generate`, {
+      method: 'POST',
+      body: JSON.stringify(config),
+    });
+  }
+
+  async deleteMealPlan(id: string) {
+    return this.request(`/meal-plans/${id}`, { method: 'DELETE' });
+  }
+
+  async toggleMealPlanFavorite(id: string) {
+    return this.request(`/meal-plans/${id}/favorite`, {
+      method: 'POST',
+    });
+  }
+
+  async shareMealPlan(id: string) {
+    return this.request(`/meal-plans/${id}/share`, {
+      method: 'POST',
+    });
+  }
+
+  async exportMealPlan(id: string, format: 'pdf' | 'csv' | 'json') {
+    const response = await fetch(`${this.baseUrl}/meal-plans/${id}/export?format=${format}`, {
+      headers: {
+        'Authorization': `Bearer ${this.getToken()}`,
+      },
+    });
+    
+    if (!response.ok) {
+      throw new ApiError(
+        response.status,
+        'Export failed'
+      );
+    }
+
+    const blob = await response.blob();
+    return blob;
+  }
 }
 
 export const api = new ApiClient();
