@@ -4,6 +4,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { DietProfilesModule } from './modules/diet-profiles/diet-profiles.module';
 import { RecipesModule } from './modules/recipes/recipes.module';
 import { MealPlansModule } from './modules/meal-plans/meal-plans.module';
+import { AIModule } from './modules/ai/ai.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { MealPlansModule } from './modules/meal-plans/meal-plans.module';
     DietProfilesModule,
     RecipesModule,
     MealPlansModule,
+    AIModule,
   ],
   controllers: [],
   providers: [],
