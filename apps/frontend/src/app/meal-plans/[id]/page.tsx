@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { api } from 'lib/api';
-import { MealPlan } from 'types/meal-plan';
-import { ProtectedRoute } from 'components/protected-route';
+import { api } from '@/lib/api';
+import { MealPlan } from '@/types/meal-plan';
+import { ProtectedRoute } from '@/components/protected-route';
 
 export default function MealPlanDetailPage() {
   const router = useRouter();

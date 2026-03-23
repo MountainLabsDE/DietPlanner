@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { api } from '../../lib/api';
-import { Recipe, MEAL_TYPES, DIFFICULTY_LEVELS } from '../../types/recipe';
-import ProtectedRoute from '../../components/protected-route';
+import { api } from '@/lib/api';
+import { Recipe, MEAL_TYPES, DIFFICULTY_LEVELS } from '@/types/recipe';
+import { ProtectedRoute } from '@/components/protected-route';
 
 export default function RecipeDetailPage() {
   const params = useParams();
@@ -23,8 +23,8 @@ export default function RecipeDetailPage() {
     try {
       setLoading(true);
       setError(null);
-      const data: Recipe = await api.getRecipe(id);
-      setRecipe(data);
+      const data = await api.getRecipe(id);
+      setRecipe(data as Recipe);
     } catch (err: any) {
       setError(err.message || 'Failed to load recipe');
     } finally {

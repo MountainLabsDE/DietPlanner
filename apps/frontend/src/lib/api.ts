@@ -135,7 +135,7 @@ export class ApiClient {
     restrictions?: string[];
     maxCalories?: number;
     mealType?: string;
-  }) {
+  }): Promise<any> {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
@@ -151,7 +151,7 @@ export class ApiClient {
     return this.request(endpoint, { method: 'GET' });
   }
 
-  async getRecipe(id: string) {
+  async getRecipe(id: string): Promise<any> {
     return this.request(`/recipes/${id}`, { method: 'GET' });
   }
 

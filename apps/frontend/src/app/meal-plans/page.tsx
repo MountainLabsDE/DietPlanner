@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { api } from 'lib/api';
-import { MealPlan } from 'types/meal-plan';
-import { useAuth } from 'contexts/auth-context';
-import { ProtectedRoute } from 'components/protected-route';
+import { api } from '@/lib/api';
+import { MealPlan } from '@/types/meal-plan';
+import { useAuth } from '@/contexts/auth-context';
+import { ProtectedRoute } from '@/components/protected-route';
 
 export default function MealPlansPage() {
   const { user } = useAuth();

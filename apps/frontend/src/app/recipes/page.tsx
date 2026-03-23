@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { api } from '../../lib/api';
-import { Recipe, RecipeResponse, MEAL_TYPES, DIFFICULTY_LEVELS, RecipeFilters } from '../../types/recipe';
-import { useAuth } from '../../contexts/auth-context';
-import { ProtectedRoute } from '../../components/protected-route';
+import { api } from '@/lib/api';
+import { Recipe, RecipeResponse, MEAL_TYPES, DIFFICULTY_LEVELS, RecipeFilters } from '@/types/recipe';
+import { useAuth } from '@/contexts/auth-context';
+import { ProtectedRoute } from '@/components/protected-route';
 
 export default function RecipesPage() {
   const { user } = useAuth();

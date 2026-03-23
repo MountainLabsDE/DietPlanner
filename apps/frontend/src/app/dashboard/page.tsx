@@ -1,7 +1,7 @@
 'use client';
 
-import { useAuth } from '../../contexts/auth-context';
-import { ProtectedRoute } from '../../components/protected-route';
+import { useAuth } from '@/contexts/auth-context';
+import { ProtectedRoute } from '@/components/protected-route';
 
 export default function DashboardPage() {
   const { user, logout } = useAuth();

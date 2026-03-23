@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { api } from 'lib/api';
-import { VARIETY_OPTIONS, MEALS_PER_DAY_OPTIONS, DAYS_OPTIONS, MEAL_TYPE_OPTIONS } from 'types/meal-plan';
-import { useAuth } from 'contexts/auth-context';
-import { ProtectedRoute } from 'components/protected-route';
+import { api } from '@/lib/api';
+import { VARIETY_OPTIONS, MEALS_PER_DAY_OPTIONS, DAYS_OPTIONS, MEAL_TYPE_OPTIONS } from '@/types/meal-plan';
+import { useAuth } from '@/contexts/auth-context';
+import { ProtectedRoute } from '@/components/protected-route';
 
 export default function GenerateMealPlanPage() {
   const { user } = useAuth();
