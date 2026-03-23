@@ -28,6 +28,7 @@ model User {
   updatedAt         DateTime @updatedAt
   dietProfiles      DietProfile[]
   customRecipes     CustomRecipe[]
+  recipes           Recipe[] @relation("RecipeAuthor")
   tracking          DailyTracking[]
   achievements      Achievement[]
 
@@ -73,7 +74,7 @@ model Recipe {
   cuisine      String?
   dietaryInfo  Json[]
   authorId     String?
-  author       User?    @relation(fields: [authorId], references: [id])
+  author       User?    @relation("RecipeAuthor", fields: [authorId], references: [id])
   isPublic     Boolean  @default(true)
   avgRating    Decimal? @default(0) @db.Decimal(3, 2)
   reviewCount  Int      @default(0)
@@ -118,7 +119,6 @@ model MealPlanMeal {
   dayNumber  Int
 
   @@map("meal_plan_meals")
-  @@id([id])
   @@index([mealPlanId])
 }
 
