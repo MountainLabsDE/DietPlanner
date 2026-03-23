@@ -125,6 +125,62 @@ export class ApiClient {
   async delete<D = any>(endpoint: string) {
     return this.request<D>(endpoint, { method: 'DELETE' });
   }
+
+  // Recipe methods
+  async getRecipes(params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    tags?: string[];
+    restrictions?: string[];
+    maxCalories?: number;
+    mealType?: string;
+  }) {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.tags) queryParams.append('tags', params.tags.join(','));
+    if (params?.restrictions) queryParams.append('restrictions', params.restrictions.join(','));
+    if (params?.maxCalories) queryParams.append('maxCalories', params.maxCalories.toString());
+    if (params?.mealType) queryParams.append('mealType', params.mealType);
+
+    const queryString = queryParams.toString();
+    const endpoint = `/recipes${queryString ? `?${queryString}` : ''}`;
+    
+    return this.request(endpoint, { method: 'GET' });
+  }
+
+  async getRecipe(id: string) {
+    return this.request(`/recipes/${id}`, { method: 'GET' });
+  }
+
+  async createRecipe(data: any) {
+    return this.request('/recipes', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateRecipe(id: string, data: any) {
+    return this.request(`/recipes/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteRecipe(id: string) {
+    return this.request(`/recipes/${id}`, { method: 'DELETE' });
+  }
+
+  async getRecipesByTag(tag: string) {
+    return this.request(`/recipes/tags/${tag}`, { method: 'GET' });
+  }
+
+  async getQuickRecipes(maxPrepTime?: number) {
+    const queryParams = maxPrepTime ? `?maxPrepTime=${maxPrepTime}` : '';
+    return this.request(`/recipes/quick${queryParams}`, { method: 'GET' });
+  }
 }
 
 export const api = new ApiClient();
