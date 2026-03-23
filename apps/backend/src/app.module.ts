@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
+import { DietProfilesModule } from './modules/diet-profiles/diet-profiles.module';
 
 @Module({
   imports: [
@@ -9,6 +10,7 @@ import { AuthModule } from './modules/auth/auth.module';
       envFilePath: '.env',
     }),
     AuthModule,
+    DietProfilesModule,
   ],
   controllers: [],
   providers: [],

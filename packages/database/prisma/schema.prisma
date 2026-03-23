@@ -38,24 +38,31 @@ model User {
 }
 
 model DietProfile {
-  id                   String   @id @default(uuid())
-  userId               String
-  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name                 String
-  type                 String
-  restrictions          Json
-  macros               Json
-  preferences          Json
-  excludedIngredients    String[]
-  combinedProfileIds    String[]
-  isDefault            Boolean  @default(false)
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-  mealPlans            MealPlan[]
+  id                  String   @id @default(uuid())
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name                String
+  type                String
+  description         String?
+  predefinedType      String?
+  restrictions        Json
+  config              Json
+  dailyCalorieTarget Int?
+  proteinPercentage   Int?
+  carbsPercentage     Int?
+  fatPercentage      Int?
+  isFavorite          Boolean  @default(false)
+  isDefault          Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  mealPlans          MealPlan[]
 
   @@map("diet_profiles")
   @@index([userId])
+  @@index([type])
+  @@index([predefinedType])
   @@index([userId, isDefault])
+  @@index([isFavorite])
 }
 
 model Recipe {
