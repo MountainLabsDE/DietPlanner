@@ -103,27 +103,101 @@ export class MealPlansController {
       return res.send(csv);
     }
     
-    // PDF format - return plain text for now (real implementation would use PDF library)
-    res.setHeader('Content-Type', 'text/plain');
-    res.setHeader('Content-Disposition', `attachment; filename="meal-plan-${data.name || 'custom'}.txt"`);
-    let text = `Meal Plan: ${data.name || 'Custom'}\n`;
-    text += `Profile: ${data.profile?.name || 'N/A'}\n`;
-    text += `Days: ${days.length || 0}\n\n`;
+    const pdfStructure = {
+      type: 'pdf-structure',
+      plan: {
+        name: data.name || 'Custom Plan',
+        createdAt: data.createdAt,
+        profile: data.profile?.name || 'N/A',
+        profileType: data.profile?.predefinedType || 'Custom',
+        daysCount: days.length,
+      },
+      summary: {
+        totalMeals: days.reduce((sum: number, day: any) => {
+          const dayMeals = Array.isArray(day.meals) ? day.meals : [];
+          return sum + dayMeals.length;
+        }, 0),
+        totalRecipes: days.reduce((sum: number, day: any) => {
+          const dayMeals = Array.isArray(day.meals) ? day.meals : [];
+          const recipesPerMeal = dayMeals.reduce((mSum: number, meal: any) => {
+            const items = Array.isArray(meal.items) ? meal.items : [];
+            return mSum + items.length;
+          }, 0);
+          return sum + recipesPerMeal;
+        }, 0),
+        totalCalories: days.reduce((sum: number, day: any) => {
+          const dayMeals = Array.isArray(day.meals) ? day.meals : [];
+          return sum + dayMeals.reduce((mSum: number, meal: any) => {
+            const items = Array.isArray(meal.items) ? meal.items : [];
+            return mSum + items.reduce((iSum: number, item: any) => iSum + (item.calories || 0), 0);
+          }, 0);
+        }, 0),
+        totalProtein: days.reduce((sum: number, day: any) => {
+          const dayMeals = Array.isArray(day.meals) ? day.meals : [];
+          return sum + dayMeals.reduce((mSum: number, meal: any) => {
+            const items = Array.isArray(meal.items) ? meal.items : [];
+            return mSum + items.reduce((iSum: number, item: any) => iSum + (item.protein || 0), 0);
+          }, 0);
+        }, 0),
+        totalCarbs: days.reduce((sum: number, day: any) => {
+          const dayMeals = Array.isArray(day.meals) ? day.meals : [];
+          return sum + dayMeals.reduce((mSum: number, meal: any) => {
+            const items = Array.isArray(meal.items) ? meal.items : [];
+            return mSum + items.reduce((iSum: number, item: any) => iSum + (item.carbs || 0), 0);
+          }, 0);
+        }, 0),
+        totalFat: days.reduce((sum: number, day: any) => {
+          const dayMeals = Array.isArray(day.meals) ? day.meals : [];
+          return sum + dayMeals.reduce((mSum: number, meal: any) => {
+            const items = Array.isArray(meal.items) ? meal.items : [];
+            return mSum + items.reduce((iSum: number, item: any) => iSum + (item.fat || 0), 0);
+          }, 0);
+        }, 0),
+      },
+      days: days.map((day: any) => {
+        const dayMeals = Array.isArray(day.meals) ? day.meals : [];
+        return {
+          day: day.day,
+          meals: dayMeals.map((meal: any) => {
+            const items = Array.isArray(meal.items) ? meal.items : [];
+            return {
+              name: meal.name,
+              time: meal.time || 'N/A',
+              recipes: items.map((item: any) => ({
+                name: item.recipe?.name || 'N/A',
+                calories: item.calories || 0,
+                protein: item.protein || 0,
+                carbs: item.carbs || 0,
+                fat: item.fat || 0,
+              })),
+              dayCalories: items.reduce((sum: number, item: any) => sum + (item.calories || 0), 0),
+              dayProtein: items.reduce((sum: number, item: any) => sum + (item.protein || 0), 0),
+              dayCarbs: items.reduce((sum: number, item: any) => sum + (item.carbs || 0), 0),
+              dayFat: items.reduce((sum: number, item: any) => sum + (item.fat || 0), 0),
+            };
+          }),
+        dayCalories: dayMeals.reduce((sum: number, meal: any) => {
+            const items = Array.isArray(meal.items) ? meal.items : [];
+            return sum + items.reduce((iSum: number, item: any) => iSum + (item.calories || 0), 0);
+          }, 0),
+          dayProtein: dayMeals.reduce((sum: number, meal: any) => {
+            const items = Array.isArray(meal.items) ? meal.items : [];
+            return sum + items.reduce((iSum: number, item: any) => iSum + (item.protein || 0), 0);
+          }, 0),
+          dayCarbs: dayMeals.reduce((sum: number, meal: any) => {
+            const items = Array.isArray(meal.items) ? meal.items : [];
+            return sum + items.reduce((iSum: number, item: any) => iSum + (item.carbs || 0), 0);
+          }, 0),
+          dayFat: dayMeals.reduce((sum: number, meal: any) => {
+            const items = Array.isArray(meal.items) ? meal.items : [];
+            return sum + items.reduce((iSum: number, item: any) => iSum + (item.fat || 0), 0);
+          }, 0),
+        };
+      }),
+    };
     
-    days.forEach((day: any) => {
-      text += `Day ${day.day}\n`;
-      text += '---\n';
-      const meals = Array.isArray(day.meals) ? day.meals : [];
-      meals.forEach((meal: any) => {
-        text += `${meal.name}\n`;
-        const items = Array.isArray(meal.items) ? meal.items : [];
-        items.forEach((item: any) => {
-          text += `- ${item.recipe?.name || 'N/A'} (${item.calories || 0} kcal)\n`;
-        });
-        text += '\n';
-      });
-      text += '\n';
-    });
-    return res.send(text);
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="meal-plan-${data.name || 'custom'}.pdf"`);
+    return res.json(pdfStructure);
   }
 }
