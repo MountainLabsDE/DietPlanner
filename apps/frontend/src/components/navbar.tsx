@@ -13,6 +13,7 @@ export function Navbar() {
     { href: '/diet-profiles', label: 'Diet Profiles', icon: '🥗' },
     { href: '/recipes', label: 'Recipes', icon: '🍳' },
     { href: '/meal-plans', label: 'Meal Plans', icon: '📅' },
+    { href: '/scanner', label: 'Scanner', icon: '📷' },
     { href: '/tracking', label: 'Tracking', icon: '📊' },
     { href: '/settings', label: 'Settings', icon: '⚙️' },
   ];
