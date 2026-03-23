@@ -1,10 +1,64 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
+import { api } from '@/lib/api';
 import { ProtectedRoute } from '@/components/protected-route';
 
+interface DashboardStats {
+  mealPlans: number;
+  dietProfiles: number;
+  recipes: number;
+  daysTracked: number;
+}
+
 export default function DashboardPage() {
+  const router = useRouter();
   const { user, logout } = useAuth();
+  const [stats, setStats] = useState<DashboardStats>({
+    mealPlans: 0,
+    dietProfiles: 0,
+    recipes: 0,
+    daysTracked: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  loadStats = async () => {
+    try {
+      setLoading(true);
+      
+      // Load diet profiles count
+      const profilesData: any = await api.getDietProfiles(false, 1, 1);
+      const profilesCount = profilesData.meta?.total || 0;
+
+      // Load meal plans count
+      const plansData: any = await api.getMealPlans();
+      const plansCount = plansData.meta?.total || 0;
+
+      // Load recipes count
+      const recipesData: any = await api.getRecipes({ limit: 1 });
+      const recipesCount = recipesData.meta?.total || 0;
+
+      // Days tracked (placeholder for now - will be implemented with tracking feature)
+      const daysTracked = 0;
+
+      setStats({
+        mealPlans: plansCount,
+        dietProfiles: profilesCount,
+        recipes: recipesCount,
+        daysTracked,
+      });
+    } catch (error) {
+      console.error('Failed to load dashboard stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ProtectedRoute fallback={
@@ -95,28 +149,76 @@ export default function DashboardPage() {
             <h3 className="text-2xl font-bold text-gray-900 mb-6">
               Quick Stats
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border-2 border-purple-200">
-                <div className="text-4xl font-bold text-purple-600 mb-2">0</div>
-                <div className="text-gray-600 font-medium">Meal Plans</div>
+            {loading ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
               </div>
-              
-              <div className="text-center p-6 bg-gradient-to-br from-pink-50 to-orange-50 rounded-xl border-2 border-pink-200">
-                <div className="text-4xl font-bold text-pink-600 mb-2">0</div>
-                <div className="text-gray-600 font-medium">Diet Profiles</div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border-2 border-purple-200 hover:shadow-lg transition-shadow">
+                  <div className="text-4xl font-bold text-purple-600 mb-2">{stats.mealPlans}</div>
+                  <div className="text-gray-600 font-medium">Meal Plans</div>
+                </div>
+                
+                <div className="text-center p-6 bg-gradient-to-br from-pink-50 to-orange-50 rounded-xl border-2 border-pink-200 hover:shadow-lg transition-shadow">
+                  <div className="text-4xl font-bold text-pink-600 mb-2">{stats.dietProfiles}</div>
+                  <div className="text-gray-600 font-medium">Diet Profiles</div>
+                </div>
+                
+                <div className="text-center p-6 bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl border-2 border-orange-200 hover:shadow-lg transition-shadow">
+                  <div className="text-4xl font-bold text-orange-600 mb-2">{stats.recipes}</div>
+                  <div className="text-gray-600 font-medium">Recipes</div>
+                </div>
+                
+                <div className="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border-2 border-green-200 hover:shadow-lg transition-shadow">
+                  <div className="text-4xl font-bold text-green-600 mb-2">{stats.daysTracked}</div>
+                  <div className="text-gray-600 font-medium">Days Tracked</div>
+                </div>
               </div>
-              
-              <div className="text-center p-6 bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl border-2 border-orange-200">
-                <div className="text-4xl font-bold text-orange-600 mb-2">0</div>
-                <div className="text-gray-600 font-medium">Recipes</div>
-              </div>
-              
-              <div className="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border-2 border-green-200">
-                <div className="text-4xl font-bold text-green-600 mb-2">0</div>
-                <div className="text-gray-600 font-medium">Days Tracked</div>
+            )}
+          </div>
+
+          {/* Empty State Guide */}
+          {stats.dietProfiles === 0 && stats.mealPlans === 0 && !loading && (
+            <div className="mt-8 bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 border-2 border-purple-200">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                👋 Welcome to PlatePulse!
+              </h3>
+              <div className="space-y-4">
+                <p className="text-gray-700">
+                  Get started with your nutrition journey by following these steps:
+                </p>
+                <ol className="list-decimal list-inside space-y-3 text-gray-700 ml-4">
+                  <li>
+                    <strong>Create a Diet Profile</strong> - Define your dietary preferences (Vegan, Keto, etc.), calorie targets, and restrictions
+                  </li>
+                  <li>
+                    <strong>Explore Recipes</strong> - Browse our library of recipes with detailed nutritional information
+                  </li>
+                  <li>
+                    <strong>Generate Meal Plans</strong> - Create personalized meal plans based on your diet profiles
+                  </li>
+                  <li>
+                    <strong>Track Your Progress</strong> - Monitor your nutrition goals and stay motivated
+                  </li>
+                </ol>
+                <div className="mt-6 flex gap-4">
+                  <button
+                    onClick={() => router.push('/diet-profiles/create')}
+                    className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:shadow-xl transition-all"
+                  >
+                    Create First Profile
+                  </button>
+                  <button
+                    onClick={() => router.push('/recipes')}
+                    className="px-6 py-3 bg-white text-purple-600 border-2 border-purple-300 rounded-xl font-semibold hover:bg-purple-50 transition-all"
+                  >
+                    Browse Recipes
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </main>
       </div>
     </ProtectedRoute>
