@@ -1,0 +1,47 @@
+name: PlatePulse Diet Planner
+version: "1.0.0"
+slug: dietplanner
+description: "PlatePulse - A fully responsive, mobile-first diet planning application with AI-powered meal planning"
+url: "https://github.com/MountainLabsDE/DietPlanner"
+arch:
+  - aarch64
+  - amd64
+  - armv7
+init: false
+ports:
+  3000/tcp: 3000
+map:
+  - config:rw
+  - share:rw
+  - media:rw
+options:
+  log_level: "info"
+  ssl: false
+  certfile: "fullchain.pem"
+  keyfile: "privkey.pem"
+  jwt_secret: ""  # Auto-generated on first run if left empty
+  jwt_expiration: "15m"
+  jwt_refresh_expiration: "7d"
+  openai_api_key: ""  # AI API key (litellm/OpenAI/etc.)
+  openai_base_url: ""  # Custom API base URL (e.g., litellm/LLM proxy)
+  openai_model: "gpt-4o-mini"  # Default model name
+  port: 3000
+  database_url: ""  # Leave empty for SQLite
+schema:
+  log_level: "list(info|debug|warning|error)"
+  ssl: "bool"
+  certfile: "str"
+  keyfile: "str"
+  jwt_secret: "str"
+  jwt_expiration: "str"
+  jwt_refresh_expiration: "str"
+  openai_api_key: "password"
+  openai_base_url: "str"
+  openai_model: "str"
+  port: "int"
+  database_url: "password"
+image: "ghcr.io/mountainlabsde/dietplanner-{arch}"
+ingress: true
+ingress_port: 3000
+panel_icon: "mdi:food"
+panel_title: "PlatePulse"

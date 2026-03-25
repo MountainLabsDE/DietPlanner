@@ -1,0 +1,4 @@
+# https://developers.home-assistant.io/docs/apps/repository#repository-configuration
+name: PlatePulse Diet Planner Add-ons
+url: 'https://github.com/MountainLabsDE/DietPlanner'
+maintainer: MountainLabs <contact@mountainlabs.eu>

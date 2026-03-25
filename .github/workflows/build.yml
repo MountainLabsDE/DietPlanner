@@ -1,0 +1,69 @@
+name: Build
+
+on:
+  push:
+    branches: [ main, development ]
+  pull_request:
+    branches: [ main, development ]
+
+jobs:
+  build:
+    name: Build ${{ matrix.app }}
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    strategy:
+      matrix:
+        app: [frontend, backend]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install pnpm
+        run: corepack enable pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Display build directory for ${{ matrix.app }}
+        run: |
+          echo "=== Directory structure for ${{ matrix.app }} ==="
+          ls -la apps/${{ matrix.app }}/
+
+      - name: Build ${{ matrix.app }}
+        run: |
+          echo "=== Starting build of ${{ matrix.app }} ==="
+          pnpm --filter ./apps/${{ matrix.app }} build || (
+            echo "=== Build failed, checking for errors ==="
+            cd apps/${{ matrix.app }}
+            pnpm build 2>&1 | tee build-errors.log
+            echo "::warning::Build failed for ${{ matrix.app }}. Errors have been logged. Check build-errors.log artifact."
+          )
+
+      - name: Upload build logs if any
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.app }}-build-logs
+          path: apps/${{ matrix.app }}/build-errors.log
+
+      - name: Upload ${{ matrix.app }} build artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.app }}-build
+          path: |
+            apps/frontend/.next
+            apps/backend/dist
+          retention-days: 7

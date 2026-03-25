@@ -1,0 +1,82 @@
+# Development Rules
+
+## Core Principles
+
+1. **No AI Leaks in Commits**
+   - Never commit messages mentioning AI assistants (Claude, OpenHands, etc.)
+   - No "Co-authored-by" messages
+   - No references to AI tools in commit history
+   - Professional, human-readable commit messages only
+
+2. **Code Quality Standards**
+   - 100% compilation success rate
+   - No disabled classes or code
+   - No mockups, simulations, or fakes
+   - No commented-out code (remove dead code)
+   - No errors or warnings during build
+   - Enterprise-grade quality throughout
+
+3. **Work Organization**
+   - All artifacts go in `.development` folder
+   - Track progress in `.development/progress`
+   - Store recovery info in `.development/recovery`
+   - Documentation in `.development/docs`
+   - Follow conventional commits: chore, feat, fix, docs, etc.
+
+4. **Issue Management**
+   - Every feature must have a GitHub issue
+   - Create and use proper labels before creating issues
+   - Update issues throughout development
+   - Mark issues as completed when done
+
+5. **Git Best Practices**
+   - Work on feature branches, not main
+   - Keep main branch stable at all times
+   - Use development branch for ongoing work
+   - Follow semantic versioning
+   - Professional commit messages
+
+6. **Technical Debt**
+   - Keep technical debt low
+   - Address issues promptly
+   - Follow best practices
+   - Write clean, maintainable code
+   - Document complex logic
+
+7. **Continuous Integration**
+   - Use GitHub Actions for CI/CD
+   - All tests must pass before merging
+   - Automated code quality checks
+   - Security scanning enabled
+
+8. **Security**
+   - Never commit secrets or sensitive data
+   - Use environment variables for configuration
+   - Regular security audits
+   - Follow OWASP guidelines
+
+## Conventional Commits Format
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+Types:
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation only changes
+- `style`: Code style changes (formatting, etc.)
+- `refactor`: Code refactoring
+- `perf`: Performance improvements
+- `test`: Adding or updating tests
+- `chore`: Maintenance tasks
+- `ci`: CI/CD changes
+
+Examples:
+- `feat(user-profile): add diet profile combination feature`
+- `fix(meal-plan): resolve calorie calculation bug`
+- `chore(deps): update Next.js to version 14`
