@@ -18,16 +18,13 @@ export FRONTEND_URL="/"
 DATABASE_URL=$(bashio::config 'database_url')
 
 if [ -z "$DATABASE_URL" ]; then
-  # Empty = SQLite default
   export DATABASE_URL="file:/app/data/platepulse.db"
   DB_MODE="sqlite"
   bashio::log.info "DATABASE_URL empty - using SQLite at default path"
 elif [[ "$DATABASE_URL" == file://* ]]; then
-  # File URL = SQLite custom path
   DB_MODE="sqlite"
   bashio::log.info "DATABASE_URL is file:// - using SQLite"
 else
-  # PostgreSQL URL
   DB_MODE="postgresql"
   bashio::log.info "DATABASE_URL is PostgreSQL URL"
 fi
@@ -80,19 +77,21 @@ if [ "$DB_MODE" = "sqlite" ]; then
     bashio::log.info "Created SQLite data directory: $SQLITE_DIR"
   fi
   
-  # Copy SQLite schema BEFORE running migrations
-  if [ -f "prisma/schema.sqlite.prisma" ]; then
-    cp prisma/schema.sqlite.prisma prisma/schema.prisma
-    bashio::log.info "Using SQLite schema"
-  else
-    bashio::log.error "SQLite schema not found - cannot use SQLite mode"
-    exit 1
-  fi
+  # STEP 1: Copy SQLite schema
+  bashio::log.info "Copying SQLite schema..."
+  cp prisma/schema.sqlite.prisma prisma/schema.prisma
+  
+  # STEP 2: Remove old Prisma client cache
+  bashio::log.info "Cleaning Prisma client cache..."
+  rm -rf node_modules/.prisma
+  
+  # STEP 3: Regenerate Prisma Client
+  bashio::log.info "Regenerating Prisma Client for SQLite..."
+  npx prisma generate --schema=prisma/schema.prisma
+  bashio::log.info "Prisma Client regenerated successfully"
+  
 else
-  # PostgreSQL mode - ensure PostgreSQL schema is active
-  if [ -f "prisma/schema.postgresql.prisma.bak" ]; then
-    cp prisma/schema.postgresql.prisma.bak prisma/schema.prisma
-  fi
+  # PostgreSQL mode
   bashio::log.info "Using PostgreSQL schema"
 fi
 
