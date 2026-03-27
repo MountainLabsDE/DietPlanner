@@ -81,13 +81,23 @@ if [ "$DB_MODE" = "sqlite" ]; then
   bashio::log.info "Copying SQLite schema..."
   cp prisma/schema.sqlite.prisma prisma/schema.prisma
   
-  # STEP 2: Remove old Prisma client cache
-  bashio::log.info "Cleaning Prisma client cache..."
+  # STEP 2: Remove old Prisma client caches from all locations
+  bashio::log.info "Cleaning Prisma client caches..."
   rm -rf node_modules/.prisma
+  rm -rf ../apps/backend/node_modules/.prisma
+  rm -rf /app/node_modules/.prisma
   
-  # STEP 3: Regenerate Prisma Client
+  # STEP 3: Regenerate Prisma Client in all necessary locations
   bashio::log.info "Regenerating Prisma Client for SQLite..."
+  
+  # Generate in database package
   npx prisma generate --schema=prisma/schema.prisma
+  
+  # Generate in backend package (since it has its own @prisma/client)
+  cd ../apps/backend
+  npx prisma generate --schema=../packages/database/prisma/schema.prisma
+  
+  cd ../packages/database
   bashio::log.info "Prisma Client regenerated successfully"
   
 else
