@@ -13,10 +13,29 @@ export default function GenerateMealPlanPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dietProfileId, setDietProfileId] = useState<string>('');
+  const [dietProfiles, setDietProfiles] = useState<{ id: string; name: string; description?: string }[]>([]);
+  const [profilesLoading, setProfilesLoading] = useState(true);
   const [mealsPerDay, setMealsPerDay] = useState(3);
   const [numberOfDays, setNumberOfDays] = useState(7);
   const [variety, setVariety] = useState('medium');
   const [dailyCalories, setDailyCalories] = useState('');
+
+  useEffect(() => {
+    loadDietProfiles();
+  }, []);
+
+  const loadDietProfiles = async () => {
+    try {
+      setProfilesLoading(true);
+      const data = await api.getDietProfiles(false, 1, 100);
+      const items = data.items || data || [];
+      setDietProfiles(Array.isArray(items) ? items : []);
+    } catch (err: any) {
+      console.error('Failed to load diet profiles:', err);
+    } finally {
+      setProfilesLoading(false);
+    }
+  };
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,16 +113,29 @@ export default function GenerateMealPlanPage() {
                     onChange={(e) => setDietProfileId(e.target.value)}
                     className="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
                     required
+                    disabled={profilesLoading}
                   >
-                    <option value="">Select a diet profile...</option>
-                    <option value="profile-1">Vegan - Balanced</option>
-                    <option value="profile-2">Keto - Low Carb</option>
-                    <option value="profile-3">Vegan Keto - Low Carb Plant-Based</option>
-                    <option value="profile-4">Paleo</option>
+                    <option value="">
+                      {profilesLoading ? 'Loading profiles...' : 'Select a diet profile...'}
+                    </option>
+                    {dietProfiles.map((profile) => (
+                      <option key={profile.id} value={profile.id}>
+                        {profile.name}{profile.description ? ` - ${profile.description}` : ''}
+                      </option>
+                    ))}
                   </select>
-                  <p className="mt-2 text-sm text-gray-600">
-                    Create a diet profile in the Diet Profiles section if you haven&apos;t already
-                  </p>
+                  {dietProfiles.length === 0 && !profilesLoading && (
+                    <p className="mt-2 text-sm text-amber-600">
+                      No diet profiles found.{' '}
+                      <button
+                        type="button"
+                        onClick={() => router.push('/diet-profiles')}
+                        className="underline hover:text-amber-800"
+                      >
+                        Create one first
+                      </button>
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
