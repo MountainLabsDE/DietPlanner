@@ -10,7 +10,6 @@ jobs:
   lint:
     name: Lint Code
     runs-on: ubuntu-latest
-    continue-on-error: true
 
     strategy:
       matrix:
@@ -38,5 +37,5 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Lint ${{ matrix.app }}
-        run: pnpm --filter ./apps/${{ matrix.app }} lint || echo "::warning::Lint failed but continuing"
+        run: pnpm --filter ./apps/${{ matrix.app }} lint
 

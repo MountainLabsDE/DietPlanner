@@ -10,7 +10,6 @@ jobs:
   build:
     name: Build ${{ matrix.app }}
     runs-on: ubuntu-latest
-    continue-on-error: true
 
     strategy:
       matrix:
@@ -42,14 +41,7 @@ jobs:
           ls -la apps/${{ matrix.app }}/
 
       - name: Build ${{ matrix.app }}
-        run: |
-          echo "=== Starting build of ${{ matrix.app }} ==="
-          pnpm --filter ./apps/${{ matrix.app }} build || (
-            echo "=== Build failed, checking for errors ==="
-            cd apps/${{ matrix.app }}
-            pnpm build 2>&1 | tee build-errors.log
-            echo "::warning::Build failed for ${{ matrix.app }}. Errors have been logged. Check build-errors.log artifact."
-          )
+        run: pnpm --filter ./apps/${{ matrix.app }} build
 
       - name: Upload build logs if any
         if: failure()

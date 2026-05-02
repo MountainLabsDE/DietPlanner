@@ -10,7 +10,6 @@ jobs:
   typecheck:
     name: Type Check
     runs-on: ubuntu-latest
-    continue-on-error: true
 
     steps:
       - name: Checkout code
@@ -33,12 +32,11 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Type check all packages
-        run: pnpm typecheck || echo "::warning::Typecheck failed but continuing"
+        run: pnpm typecheck
 
   prisma-validate:
     name: Validate Prisma Schema
     runs-on: ubuntu-latest
-    continue-on-error: true
 
     steps:
       - name: Checkout code
@@ -62,4 +60,4 @@ jobs:
 
       - name: Validate Prisma schema
         working-directory: ./packages/database
-        run: npx prisma validate || echo "::warning::Prisma validation failed but continuing"
+        run: npx prisma validate
