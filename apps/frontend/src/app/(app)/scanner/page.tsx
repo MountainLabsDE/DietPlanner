@@ -1,4 +1,4 @@
- on'use client';
+'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { BrowserMultiFormatReader } from '@zxing/browser';
