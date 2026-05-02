@@ -12,7 +12,17 @@ export OPENAI_API_KEY=$(bashio::config 'openai_api_key')
 OPENAI_BASE_URL=$(bashio::config 'openai_base_url')
 export OPENAI_MODEL=$(bashio::config 'openai_model')
 export PORT=$(bashio::config 'port')
-export FRONTEND_URL="/"
+
+# Set CORS origin to Home Assistant base URL (same-origin via ingress)
+# Falls back to the addon's ingress URL if available
+if FRONTEND_URL=$(bashio::config 'frontend_url' 2>/dev/null) && [ -n "$FRONTEND_URL" ]; then
+  bashio::log.info "Using custom FRONTEND_URL from config: $FRONTEND_URL"
+else
+  FRONTEND_URL="$(bashio::info 'url' 2>/dev/null)/api/hassio_ingress/platepulse" || \
+    FRONTEND_URL="http://localhost:3000"
+  bashio::log.info "Using detected FRONTEND_URL: $FRONTEND_URL"
+fi
+export FRONTEND_URL
 
 # Determine database mode and set DATABASE_URL
 DATABASE_URL=$(bashio::config 'database_url')
