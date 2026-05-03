@@ -6,15 +6,12 @@ import { ProtectedRoute } from '@/components/protected-route';
 import { Navbar } from '@/components/navbar';
 
 interface DailyTracking {
+  id: string | null;
   date: string;
   caloriesConsumed: number;
   caloriesTarget: number;
-  proteinConsumed: number;
-  proteinTarget: number;
-  carbsConsumed: number;
-  carbsTarget: number;
-  fatConsumed: number;
-  fatTarget: number;
+  macrosConsumed: { protein: number; carbs: number; fat: number };
+  macrosTarget: { protein: number; carbs: number; fat: number };
   meals: MealEntry[];
 }
 
@@ -31,7 +28,9 @@ interface MealEntry {
 export default function TrackingPage() {
   const [tracking, setTracking] = useState<DailyTracking | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showAddMeal, setShowAddMeal] = useState(false);
+  const [addingMeal, setAddingMeal] = useState(false);
   const [newMeal, setNewMeal] = useState({
     name: '',
     calories: 0,
@@ -47,104 +46,48 @@ export default function TrackingPage() {
   const loadTodayTracking = async () => {
     try {
       setLoading(true);
-      const today = new Date().toISOString().split('T')[0];
-      // In real implementation, this would come from API
-      setTracking({
-        date: today,
-        caloriesConsumed: 1450,
-        caloriesTarget: 2000,
-        proteinConsumed: 85,
-        proteinTarget: 120,
-        carbsConsumed: 180,
-        carbsTarget: 200,
-        fatConsumed: 55,
-        fatTarget: 70,
-        meals: [
-          {
-            id: '1',
-            name: 'Greek Yogurt with Berries',
-            calories: 250,
-            protein: 20,
-            carbs: 30,
-            fat: 8,
-            time: '08:30',
-          },
-          {
-            id: '2',
-            name: 'Grilled Chicken Salad',
-            calories: 600,
-            protein: 45,
-            carbs: 25,
-            fat: 35,
-            time: '12:45',
-          },
-          {
-            id: '3',
-            name: 'Almonds and Apple',
-            calories: 300,
-            protein: 10,
-            carbs: 40,
-            fat: 20,
-            time: '15:30',
-          },
-          {
-            id: '4',
-            name: 'Protein Smoothie',
-            calories: 300,
-            protein: 30,
-            carbs: 35,
-            fat: 5,
-            time: '18:00',
-          },
-        ],
-      });
-    } catch (error) {
-      console.error('Failed to load tracking:', error);
+      setError(null);
+      const data = await api.getTodayTracking();
+      setTracking(data);
+    } catch (err: any) {
+      console.error('Failed to load tracking:', err);
+      setError(err.message || 'Failed to load tracking data');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAddMeal = () => {
+  const handleAddMeal = async () => {
     if (!newMeal.name || newMeal.calories <= 0) return;
 
-    const meal: MealEntry = {
-      id: Math.random().toString(36).substring(7),
-      ...newMeal,
-      time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
-    };
-
-    setTracking((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        meals: [...prev.meals, meal],
-        caloriesConsumed: prev.caloriesConsumed + newMeal.calories,
-        proteinConsumed: prev.proteinConsumed + newMeal.protein,
-        carbsConsumed: prev.carbsConsumed + newMeal.carbs,
-        fatConsumed: prev.fatConsumed + newMeal.fat,
-      };
-    });
-
-    setNewMeal({ name: '', calories: 0, protein: 0, carbs: 0, fat: 0 });
-    setShowAddMeal(false);
+    try {
+      setAddingMeal(true);
+      setError(null);
+      const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+      const updated = await api.addMeal({
+        ...newMeal,
+        time,
+      }) as DailyTracking;
+      setTracking(updated);
+      setNewMeal({ name: '', calories: 0, protein: 0, carbs: 0, fat: 0 });
+      setShowAddMeal(false);
+    } catch (err: any) {
+      console.error('Failed to add meal:', err);
+      setError(err.message || 'Failed to add meal');
+    } finally {
+      setAddingMeal(false);
+    }
   };
 
-  const handleDeleteMeal = (mealId: string) => {
-    setTracking((prev) => {
-      if (!prev) return prev;
-      const meal = prev.meals.find((m) => m.id === mealId);
-      if (!meal) return prev;
-
-      return {
-        ...prev,
-        meals: prev.meals.filter((m) => m.id !== mealId),
-        caloriesConsumed: prev.caloriesConsumed - meal.calories,
-        proteinConsumed: prev.proteinConsumed - meal.protein,
-        carbsConsumed: prev.carbsConsumed - meal.carbs,
-        fatConsumed: prev.fatConsumed - meal.fat,
-      };
-    });
+  const handleDeleteMeal = async (mealId: string) => {
+    try {
+      setError(null);
+      const updated = await api.deleteMealFromTracking(mealId) as DailyTracking;
+      setTracking(updated);
+    } catch (err: any) {
+      console.error('Failed to delete meal:', err);
+      setError(err.message || 'Failed to delete meal');
+    }
   };
 
   if (loading) {
@@ -163,7 +106,14 @@ export default function TrackingPage() {
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 p-8">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">No data available</h1>
-            <p className="text-xl text-gray-600">Create a meal plan to start tracking</p>
+            <p className="text-xl text-gray-600 mb-4">Create a meal plan to start tracking</p>
+            {error && <p className="text-red-500 mb-4">{error}</p>}
+            <button
+              onClick={loadTodayTracking}
+              className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all font-medium"
+            >
+              Retry
+            </button>
           </div>
         </div>
       </ProtectedRoute>
@@ -172,9 +122,9 @@ export default function TrackingPage() {
 
   const calculateProgress = (current: number, target: number) => Math.min((current / target) * 100, 100);
   const caloriesProgress = calculateProgress(tracking.caloriesConsumed, tracking.caloriesTarget);
-  const proteinProgress = calculateProgress(tracking.proteinConsumed, tracking.proteinTarget);
-  const carbsProgress = calculateProgress(tracking.carbsConsumed, tracking.carbsTarget);
-  const fatProgress = calculateProgress(tracking.fatConsumed, tracking.fatTarget);
+  const proteinProgress = calculateProgress(tracking.macrosConsumed.protein, tracking.macrosTarget.protein);
+  const carbsProgress = calculateProgress(tracking.macrosConsumed.carbs, tracking.macrosTarget.carbs);
+  const fatProgress = calculateProgress(tracking.macrosConsumed.fat, tracking.macrosTarget.fat);
 
   return (
     <ProtectedRoute>
@@ -187,6 +137,13 @@ export default function TrackingPage() {
               Track your daily intake and stay on target
             </p>
           </div>
+
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 flex justify-between items-center">
+              <span>{error}</span>
+              <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700 font-bold">&times;</button>
+            </div>
+          )}
 
           {/* Main Progress Card */}
           <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
@@ -211,8 +168,8 @@ export default function TrackingPage() {
               <div className="p-6 bg-gradient-to-br from-red-50 to-orange-50 rounded-xl border-2 border-red-200">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Protein</h3>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-2xl font-bold text-red-600">{tracking.proteinConsumed}g</span>
-                  <span className="text-sm text-gray-600">/ {tracking.proteinTarget}g</span>
+                  <span className="text-2xl font-bold text-red-600">{tracking.macrosConsumed.protein}g</span>
+                  <span className="text-sm text-gray-600">/ {tracking.macrosTarget.protein}g</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
@@ -225,8 +182,8 @@ export default function TrackingPage() {
               <div className="p-6 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl border-2 border-yellow-200">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Carbs</h3>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-2xl font-bold text-yellow-600">{tracking.carbsConsumed}g</span>
-                  <span className="text-sm text-gray-600">/ {tracking.carbsTarget}g</span>
+                  <span className="text-2xl font-bold text-yellow-600">{tracking.macrosConsumed.carbs}g</span>
+                  <span className="text-sm text-gray-600">/ {tracking.macrosTarget.carbs}g</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
@@ -239,8 +196,8 @@ export default function TrackingPage() {
               <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Fat</h3>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-2xl font-bold text-blue-600">{tracking.fatConsumed}g</span>
-                  <span className="text-sm text-gray-600">/ {tracking.fatTarget}g</span>
+                  <span className="text-2xl font-bold text-blue-600">{tracking.macrosConsumed.fat}g</span>
+                  <span className="text-sm text-gray-600">/ {tracking.macrosTarget.fat}g</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
@@ -323,12 +280,13 @@ export default function TrackingPage() {
                   <div className="flex gap-4">
                     <button
                       onClick={handleAddMeal}
-                      className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all font-medium"
+                      disabled={addingMeal}
+                      className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Add Meal
+                      {addingMeal ? 'Adding...' : 'Add Meal'}
                     </button>
                     <button
-                      onClick={() => setShowAddMeal(false)}
+                      onClick={() => { setShowAddMeal(false); setNewMeal({ name: '', calories: 0, protein: 0, carbs: 0, fat: 0 }); }}
                       className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all font-medium"
                     >
                       Cancel

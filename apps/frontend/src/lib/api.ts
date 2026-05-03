@@ -328,6 +328,53 @@ export class ApiClient {
     });
   }
 
+  // Tracking methods
+  async getTodayTracking(): Promise<{
+    id: string | null;
+    date: string;
+    caloriesConsumed: number;
+    caloriesTarget: number;
+    macrosConsumed: { protein: number; carbs: number; fat: number };
+    macrosTarget: { protein: number; carbs: number; fat: number };
+    meals: Array<{
+      id: string;
+      name: string;
+      calories: number;
+      protein: number;
+      carbs: number;
+      fat: number;
+      time: string;
+    }>;
+  }> {
+    return this.request('/tracking/today', { method: 'GET' });
+  }
+
+  async addMeal(data: {
+    name: string;
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    time?: string;
+  }) {
+    return this.request('/tracking/meals', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteMealFromTracking(mealId: string) {
+    return this.request(`/tracking/meals/${mealId}`, { method: 'DELETE' });
+  }
+
+  async getTrackingByDate(date: string) {
+    return this.request(`/tracking/${date}`, { method: 'GET' });
+  }
+
+  async getTrackingHistory(days: number = 30) {
+    return this.request(`/tracking/history?days=${days}`, { method: 'GET' });
+  }
+
   // Aliases for compatibility with frontend
   async generateAIMeals(config: any) {
     return this.generateMeals(config);
