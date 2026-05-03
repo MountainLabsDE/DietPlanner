@@ -79,6 +79,29 @@ export class AuthService {
     };
   }
 
+  async updateProfile(userId: string, dto: { firstName?: string; lastName?: string; avatarUrl?: string }) {
+    const data: any = {};
+    if (dto.firstName !== undefined) data.firstName = dto.firstName;
+    if (dto.lastName !== undefined) data.lastName = dto.lastName;
+    if (dto.avatarUrl !== undefined) data.avatarUrl = dto.avatarUrl;
+
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data,
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        isVerified: true,
+        avatarUrl: true,
+        createdAt: true,
+      },
+    });
+
+    return user;
+  }
+
   async validateUser(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },

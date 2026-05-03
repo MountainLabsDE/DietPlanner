@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { ProtectedRoute } from '@/components/protected-route';
 import { Navbar } from '@/components/navbar';
+import { api } from '@/lib/api';
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -25,8 +26,10 @@ export default function SettingsPage() {
     setMessage(null);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const updatedUser = await api.updateProfile({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+      });
       setMessage({ type: 'success', text: 'Settings saved successfully!' });
     } catch (error) {
       setMessage({ type: 'error', text: 'Failed to save settings. Please try again.' });

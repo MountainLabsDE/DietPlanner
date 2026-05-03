@@ -104,6 +104,21 @@ export class ApiClient {
     this.clearTokens();
   }
 
+  async updateProfile(data: { firstName?: string; lastName?: string; avatarUrl?: string }) {
+    return this.request<{
+      id: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      isVerified: boolean;
+      avatarUrl: string | null;
+      createdAt: string;
+    }>('/auth/profile', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
   async get<D = any>(endpoint: string) {
     return this.request<D>(endpoint, { method: 'GET' });
   }
